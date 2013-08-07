@@ -26,4 +26,25 @@ When /I (un)?check the following ratings: (.*)/ do |uncheck, rating_list|
   # HINT: use String#split to split up the rating_list, then
   #   iterate over the ratings and reuse the "When I check..." or
   #   "When I uncheck..." steps in lines 89-95 of web_steps.rb
+  rating_list.split(%r{,\s*}).each { |rating| uncheck=="un" ? uncheck("ratings_#{rating}") : check("ratings_#{rating}") }
 end
+
+Then /^I should( not)? see movies with ratings: (.*)/ do |neg, rating_list|                                                                                                                                 
+  Movie.find_all_by_rating(rating_list.split(%r{,\s*})).each do |m|
+    #within_table('movies') do
+    if neg==' not' 
+      page.should_not have_xpath("//td/*", :text => m.title, :count => 1)
+    else
+      page.should have_xpath("//td/*", :text => m.title, :count => 1)
+    end
+    
+    #end
+  end
+end 
+
+Then /I should see all movies/ do
+  Movie.all.each do |m|
+    page.should have_xpath("//td/*", :text => m.title, :count => 1)
+  end
+end 
+  
